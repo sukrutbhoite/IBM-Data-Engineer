@@ -1,38 +1,54 @@
 from airflow.models import DAG
-from airflow.operators.python import PythonOperator
-from datetime import timedelta
-from airflow.utils.dates import days_ago
+from airflow.providers.standard.operators.python import PythonOperator
+import datetime
+import pandas as pd
 import tarfile
+import os
 
 
-tarfile_path = "H://tolldata.tgz"
-extraction_path = "H://Temp"
+tarfile_path = "H://IBM-Data-Engineer/ETL and Data Pipelines with Shell, Airflow and Kafka/Module 5/Data/tolldata.tgz"
+extraction_path = "H://IBM-Data-Engineer/ETL and Data Pipelines with Shell, Airflow and Kafka/Module 5/Data"
+vehicle_data_csv = "H://IBM-Data-Engineer/ETL and Data Pipelines with Shell, Airflow and Kafka/Module 5/Data/vehicle-data.csv"
+tollplaza_data_tsv = "H://IBM-Data-Engineer/ETL and Data Pipelines with Shell, Airflow and Kafka/Module 5/Data/tollplaza-data.tsv"
+payment_data_txt = "H://IBM-Data-Engineer/ETL and Data Pipelines with Shell, Airflow and Kafka/Module 5/Data/payment-data.txt"
+
+def unzip_data(tgz_path, extract_dir):
+    if not os.path.exists(extract_dir):
+        os.makedirs(extract_dir)
+    try:
+        with tarfile.open(tgz_path, "r:gz") as tar:
+            tar.extractall(path=extract_dir)
+    except tarfile.ReadError:
+        print(f"Error: Could not read '{tgz_path}'.")
+    except FileNotFoundError:
+        print(f"Error: The file '{tgz_path}' was not found.")
+    except Exception as e:
+        print(f"An unexpected error occurred: {e}")
 
 
-def unzip(file,path):
-    with tarfile.open(file, "r:gz") as tar:
-        tar.extractall(path)
+def extract_data_from_csv(csv_path):
+    df = pd.read_csv(csv_path)
+    print(df.head)
 
-unzip(tarfile_path,extraction_path)
-#
+extract_data_from_csv(vehicle_data_csv)
 # default_args = {
 #     'owner': 'Sukrut',
-#     'start_date': days_ago(0),
+#     'start_date': datetime.date.today(),
 #     'email': 'sukrutbhoite@gmail.com',
 #     'email_on_failure': True,
 #     'email_on_retry': True,
 #     'retries': 1,
-#     'retry_delay': timedelta(minutes=5),
+#     'retry_delay': datetime.timedelta(minutes=5),
 # }
 #
 # dag = DAG(
 #     'ETL_toll_data',
-#     schedule_interval=timedelta(days=1),
+#     schedule_interval=datetime.timedelta(days=1),
 #     default_args=default_args,
 #     description='Apache Airflow Final Assignment'
 # )
 #
-#
+
 # unzip_data = BashOperator(
 #     task_id='unzip_data',
 #     bash_command='''tar -xzf /home/project/airflow/dags/finalassignment/tolldata.tgz \\
@@ -93,5 +109,5 @@ unzip(tarfile_path,extraction_path)
 #
 #
 # unzip_data >> extract_data_from_csv >> extract_data_from_tsv >> extract_data_from_fixed_width >> consolidate_data >> transform_data
-#
+
 
