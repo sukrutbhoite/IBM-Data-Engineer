@@ -1,11 +1,10 @@
 from airflow.models import DAG
-from airflow.operators.bash import BashOperator
-from datetime import timedelta
-from airflow.utils.dates import days_ago
+from airflow.providers.standard.operators.bash import BashOperator
+from datetime import datetime, timedelta
 
 default_args = {
     'owner': 'Sukrut',
-    'start_date': days_ago(0),
+    'start_date': datetime(2025,6,16),
     'email': 'sukrutbhoite@gmail.com',
     'email_on_failure': True,
     'email_on_retry': True,
